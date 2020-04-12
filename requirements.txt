@@ -1,0 +1,8 @@
+Django==2.2.10
+mysqlclient
+celery==4.3.0
+djangorestframework==3.10.3
+django-cors-headers
+django-redis
+gunicorn
+django-filter==2.2.0

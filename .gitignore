@@ -1,0 +1,15 @@
+.idea
+*.iml
+
+**/*.sqlite3
+celerybeat.pid
+celerybeat.pid
+*-key.json
+**/*.env
+
+**/__pycache__
+*.pyc
+venv/
+log/
+staticfiles/
+media/
