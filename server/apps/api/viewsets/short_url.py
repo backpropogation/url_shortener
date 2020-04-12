@@ -1,5 +1,6 @@
 import logging
 
+from django.urls import reverse
 from rest_framework import mixins
 from rest_framework import viewsets, status
 from rest_framework.parsers import JSONParser
@@ -44,7 +45,9 @@ class ShortUrlViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, viewsets.G
                 serializer.create(serializer.validated_data)
                 data = {
                     "redirect_url": serializer.validated_data['redirect_url'],
-                    "short_url": f"{request.META.get('HTTP_HOST')}/{serializer.validated_data['sub_part']}"
+                    "short_url": request.build_absolute_uri(
+                        reverse('redirector', args=(serializer.validated_data['sub_part'],))
+                    )
                 }
                 return Response(data=data, status=status.HTTP_201_CREATED)
             except Exception as e:
