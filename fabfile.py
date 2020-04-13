@@ -2,7 +2,9 @@ from fabric.api import local
 
 
 def makemigrations(app=''):
-    local("docker exec -i $(docker ps | grep server_ | awk '{{ print $1 }}') python manage.py makemigrations shortener".format(app))
+    local(
+        "docker exec -i $(docker ps | grep server_ | awk '{{ print $1 }}') python manage.py makemigrations shortener".format(
+            app))
 
 
 def migrate(app=''):
@@ -19,6 +21,10 @@ def bash():
 
 def shell():
     local("docker exec -it $(docker ps | grep server_ | awk '{{ print $1 }}') python manage.py shell")
+
+
+def test():
+    local("docker exec -it $(docker ps | grep server_ | awk '{{ print $1 }}') python manage.py test apps.shortener")
 
 
 def dev():
