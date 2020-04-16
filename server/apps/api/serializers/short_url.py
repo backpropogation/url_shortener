@@ -51,10 +51,10 @@ class ShortUrlCreateSerializer(serializers.ModelSerializer):
         obj = ShortUrl.objects.create(**validated_data, session=session)
         return obj
 
-    def to_representation(self, ordered_dict):
+    def to_representation(self, instance_dict):
         return {
-            "redirect_url": ordered_dict['redirect_url'],
+            "redirect_url": instance_dict['redirect_url'],
             "short_url": self.context['request'].build_absolute_uri(
-                reverse('redirector', args=(ordered_dict['sub_part'],))
+                reverse('redirector', args=(instance_dict['sub_part'],))
             )
         }
