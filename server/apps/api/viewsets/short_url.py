@@ -1,11 +1,11 @@
 import logging
 
-from django.urls import reverse
 from rest_framework import mixins
 from rest_framework import viewsets, status
 from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
 
+from apps.api.pagination import StandardShortUrlResultsSetPagination
 from apps.api.serializers import ShortUrlCreateSerializer, ShortUrlDynamicSerializer
 from apps.shortener.models import ShortUrl
 
@@ -16,14 +16,18 @@ class ShortUrlViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, viewsets.G
     parser_classes = (JSONParser,)
     queryset = ShortUrl.objects.all()
     serializer_class = ShortUrlDynamicSerializer
+    pagination_class = StandardShortUrlResultsSetPagination
 
-    def get_session_store(self, request):
+    # noinspection PyMethodMayBeStatic
+    def get_or_create_session(self, request):
+        # noinspection PyProtectedMember
         session = request._request.session
         if not session.session_key:
             session.create()
         return session
 
     def get_queryset(self):
+        # noinspection PyProtectedMember
         return self.queryset.filter(session__session_key=self.request._request.session.session_key)
 
     def list(self, request, *args, **kwargs):
@@ -38,19 +42,19 @@ class ShortUrlViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, viewsets.G
         return Response(serializer.data)
 
     def create(self, request, *args, **kwargs):
-        session_store = self.get_session_store(request)
-        serializer = ShortUrlCreateSerializer(data=request.data, context={'session_store': session_store})
+        session_store = self.get_or_create_session(request)
+        serializer = ShortUrlCreateSerializer(
+            data=request.data,
+            context={
+                'session_store': session_store,
+                'request': request
+            }
+        )
         if serializer.is_valid(raise_exception=True):
             try:
                 serializer.create(serializer.validated_data)
-                data = {
-                    "redirect_url": serializer.validated_data['redirect_url'],
-                    "short_url": request.build_absolute_uri(
-                        reverse('redirector', args=(serializer.validated_data['sub_part'],))
-                    )
-                }
-                return Response(data=data, status=status.HTTP_201_CREATED)
-            except Exception as e:
+                return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+            except Exception as exc:
                 logger.info(f'Error on creating subpart')
-                logger.exception(e)
-                return Response(status=status.HTTP_200_OK, data={'detail': 'gg'})
+                logger.exception(exc)
+                return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR, data={'detail': 'Some error occurred'})

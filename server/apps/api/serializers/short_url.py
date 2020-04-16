@@ -16,7 +16,7 @@ class ShortUrlDynamicSerializer(serializers.ModelSerializer):
 
     def get_sub_part(self, obj):
         request = self.context["request"]
-        return request.build_absolute_uri(reverse('redirector', args=(obj.sub_part, )))
+        return request.build_absolute_uri(reverse('redirector', args=(obj.sub_part,)))
 
     def __init__(self, *args, **kwargs):
         fields = kwargs.pop('fields', None)
@@ -35,6 +35,7 @@ class ShortUrlCreateSerializer(serializers.ModelSerializer):
         model = ShortUrl
         fields = ('redirect_url', 'sub_part')
 
+    # noinspection PyMethodMayBeStatic
     def validate_sub_part(self, sub_part):
         RegexValidator(regex='^[a-zA-Z0-9]*$', message='Enter valid sub part')(sub_part)
         if ShortUrl.objects.filter(sub_part=sub_part).exists():
@@ -45,6 +46,15 @@ class ShortUrlCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         if 'sub_part' not in validated_data:
             validated_data['sub_part'] = generate_sub_part()
+        # noinspection PyProtectedMember
         session = self.context['session_store']._get_session_from_db()
         obj = ShortUrl.objects.create(**validated_data, session=session)
         return obj
+
+    def to_representation(self, ordered_dict):
+        return {
+            "redirect_url": ordered_dict['redirect_url'],
+            "short_url": self.context['request'].build_absolute_uri(
+                reverse('redirector', args=(ordered_dict['sub_part'],))
+            )
+        }
