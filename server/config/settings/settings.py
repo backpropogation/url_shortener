@@ -72,7 +72,7 @@ CACHES = {
         }
     }
 }
-# SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
