@@ -14,5 +14,5 @@ def clear_expired_links(self):
         logger.info('Successfully cleared expired links')
     except Exception as exc:
         logger.info(f'Retrying to clear because of  {str(exc)[:50]}')
-        self.retry(countdown=60, exc=exc, max_retries=3, )
+        self.retry(countdown=60, exc=exc, max_retries=3)
         logger.critical('Couldn\'t clear expired links')

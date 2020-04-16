@@ -3,6 +3,7 @@ from django.urls import reverse
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
+from apps.shortener.utils import build_redirect_url
 from apps.shortener.utils.generate_sub_part import generate_sub_part
 from apps.shortener.models import ShortUrl
 
@@ -16,7 +17,7 @@ class ShortUrlDynamicSerializer(serializers.ModelSerializer):
 
     def get_sub_part(self, obj):
         request = self.context["request"]
-        return request.build_absolute_uri(reverse('redirector', args=(obj.sub_part,)))
+        return build_redirect_url(request, obj.sub_part)
 
     def __init__(self, *args, **kwargs):
         fields = kwargs.pop('fields', None)
@@ -47,14 +48,12 @@ class ShortUrlCreateSerializer(serializers.ModelSerializer):
         if 'sub_part' not in validated_data:
             validated_data['sub_part'] = generate_sub_part()
         # noinspection PyProtectedMember
-        session = self.context['session_store']._get_session_from_db()
+        session = self.context['session']._get_session_from_db()
         obj = ShortUrl.objects.create(**validated_data, session=session)
         return obj
 
     def to_representation(self, instance_dict):
         return {
             "redirect_url": instance_dict['redirect_url'],
-            "short_url": self.context['request'].build_absolute_uri(
-                reverse('redirector', args=(instance_dict['sub_part'],))
-            )
+            "short_url": build_redirect_url(self.context['request'], instance_dict['sub_part'])
         }
