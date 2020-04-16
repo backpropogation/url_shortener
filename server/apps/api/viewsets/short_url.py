@@ -42,11 +42,11 @@ class ShortUrlViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, viewsets.G
         return Response(serializer.data)
 
     def create(self, request, *args, **kwargs):
-        session_store = self.get_or_create_session(request)
+        session = self.get_or_create_session(request)
         serializer = ShortUrlCreateSerializer(
             data=request.data,
             context={
-                'session_store': session_store,
+                'session': session,
                 'request': request
             }
         )

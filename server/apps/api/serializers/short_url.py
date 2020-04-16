@@ -48,7 +48,7 @@ class ShortUrlCreateSerializer(serializers.ModelSerializer):
         if 'sub_part' not in validated_data:
             validated_data['sub_part'] = generate_sub_part()
         # noinspection PyProtectedMember
-        session = self.context['session_store']._get_session_from_db()
+        session = self.context['session']._get_session_from_db()
         obj = ShortUrl.objects.create(**validated_data, session=session)
         return obj
 
