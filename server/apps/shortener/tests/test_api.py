@@ -12,7 +12,7 @@ class ShortUrlTestCase(APITestCase):
     def test_get_list_of_urls_without_creation(self):
         url = reverse('shorturls-list')
         response = self.client.get(url)
-        self.assertEqual(response.data, [])
+        self.assertEqual(response.data.get('results'), [])
 
     def test_create_urls(self):
         url = reverse('shorturls-list')
@@ -37,7 +37,7 @@ class ShortUrlTestCase(APITestCase):
             self.client.post(url, data=data, format='json')
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.data), self.urls_count)
+        self.assertEqual(response.data.get('count'), self.urls_count)
 
     def test_get_list_of_urls_of_other_session(self):
         url = reverse('shorturls-list')
@@ -50,9 +50,9 @@ class ShortUrlTestCase(APITestCase):
         response = self.client.get(url)
 
         # Ensure that this session has associated short urls
-        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data.get('count'), 1)
         self.client.cookies.clear()
 
         # Ensure that another session short urls aren't available
         response = self.client.get(url)
-        self.assertEqual(response.data, [])
+        self.assertEqual(response.data.get('results'), [])
