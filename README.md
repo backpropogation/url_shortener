@@ -9,5 +9,5 @@
 - In other window:
 - `fab migrate`
 - Navigate to `http://0.0.0.0/api/`
-###Run tests
+### Run tests
 - While server container is up: `fab test`
