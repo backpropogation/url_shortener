@@ -4,7 +4,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from apps.shortener.utils import build_redirect_url
-from apps.shortener.utils.generate_sub_part import generate_sub_part
+from apps.shortener.service import generate_sub_part
 from apps.shortener.models import ShortUrl
 
 
